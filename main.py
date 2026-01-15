@@ -95,6 +95,33 @@ imf.image_to_dxf_exact(centered, "image_only.dxf")
 imf.png_to_dxf("hebrew.png", "hebrew.dxf")
 imf.png_to_dxf("braille.png", "braille.dxf")
 
+#plotting final result
+# --- 1. Image only ---
+plt.figure(figsize=(5,5))
+plt.imshow(centered, cmap="gray")
+plt.axis("off")
+plt.savefig("image_only.png", dpi=300, bbox_inches="tight", pad_inches=0)
+plt.show()
+plt.close()
+
+# --- 2. Hebrew text only ---
+plt.figure(figsize=(5,5))
+plt.gca().set_facecolor("white")
+plt.text(0.5, 0.9, f'{hebrew_prompt[::-1]}',fontsize=30, color='black', ha='center', va='center', fontweight='light',fontname='DejaVu Sans')
+plt.axis("off")
+plt.savefig("hebrew.png", dpi=300, bbox_inches="tight", pad_inches=0)
+plt.show()
+plt.close()
+
+# --- 3. Braille text only ---
+plt.figure(figsize=(5,5))
+plt.gca().set_facecolor("white")
+plt.text(0.5, 0.1, f'{Braille}',fontsize=30, color='black', ha='center', va='center', fontweight='light',fontname='Noto Sans Symbols2')
+plt.axis("off")
+plt.savefig("braille.png", dpi=300, bbox_inches="tight", pad_inches=0)
+plt.show()
+plt.close()
+
 # Visualize the results
 imf.plot_dxf("image_only.dxf")
 imf.plot_dxf("hebrew.dxf")
