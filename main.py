@@ -90,10 +90,6 @@ shift_y = int(img_cy - obj_cy)
 M = np.float32([[1, 0, shift_x], [0, 1, shift_y]])
 centered = cv2.warpAffine(edges, M, (w, h), borderValue=255)
 
-# Saving as dxf
-imf.image_to_dxf_exact(centered, "image_only.dxf")
-imf.png_to_dxf("hebrew.png", "hebrew.dxf")
-imf.png_to_dxf("braille.png", "braille.dxf")
 
 #plotting final result
 # --- 1. Image only ---
@@ -121,6 +117,11 @@ plt.axis("off")
 plt.savefig("braille.png", dpi=300, bbox_inches="tight", pad_inches=0)
 plt.show()
 plt.close()
+
+# Saving as dxf
+imf.image_to_dxf_exact(centered, "image_only.dxf")
+imf.png_to_dxf("hebrew.png", "hebrew.dxf")
+imf.png_to_dxf("braille.png", "braille.dxf")
 
 # Visualize the results
 imf.plot_dxf("image_only.dxf")
