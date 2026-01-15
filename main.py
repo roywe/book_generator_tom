@@ -40,23 +40,6 @@ else:
         torch_dtype=torch.float32
     ).to(device)
 
-# general settings of Stable Diffusion
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-if device == "cuda":
-    # GPU → float16
-    pipe = AutoPipelineForText2Image.from_pretrained(
-        "segmind/SSD-1B",
-        torch_dtype=torch.float16
-    ).to(device)
-
-else:
-    # CPU → float32
-    pipe = AutoPipelineForText2Image.from_pretrained(
-        "segmind/SSD-1B",
-        torch_dtype=torch.float32
-    ).to(device)
-
 ## text to image generator from user's input ##
 
 # desired text prompt
