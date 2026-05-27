@@ -13,8 +13,8 @@
 #                                               stl_file]
 
 #   flow will go over each page, if needed will call function of Dana and will save it in specific place
-from dxf_3d import create_one_page_stl_from_dxf
-from image_generator import images_to_dxf, create_images
+from src.dxf_3d import create_one_page_stl_from_dxf
+from src.image_generator import images_to_dxf, create_images
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -131,7 +131,7 @@ class FlowManager:
         # Example stub writes
         images = zip(IMAGES_KEYS, [image_path, text_path, braille_path])
         for key, path in images:
-            if os.path.exist():
+            if os.path.exists(str(path)):
                 page.images_locations[key] = path
             else:
                 page.images_locations[key] = None
@@ -154,7 +154,7 @@ class FlowManager:
         dxf_image_location, dxf_text_location, dxf_braille_location = images_to_dxf(image_location, text_location, braille_location)
         images = zip(IMAGES_KEYS, [dxf_image_location, dxf_text_location, dxf_braille_location])
         for key, path in images:
-            if os.path.exist():
+            if os.path.exists(str(path)):
                 page.dxf_locations[key] = path
             else:
                 page.dxf_locations[key] = None

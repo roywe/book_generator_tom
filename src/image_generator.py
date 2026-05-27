@@ -10,8 +10,8 @@ import cv2
 import numpy as np
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
-import language_funcs as lf
-import image_funcs as imf
+from src import language_funcs as lf
+from src import image_funcs as imf
 
 
 def create_images(hebrew_prompt, picture_type, image_output_location, text_output_location, braille_output_location):

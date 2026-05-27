@@ -505,33 +505,45 @@ def create_mounting_holes(base: cq.Workplane) -> cq.Workplane:
 # =========================
 # Main function
 # =========================
-def create_one_page_stl_from_dxf(txt_dxf: Path, braille_dxf: Path, image_dxf: Path):
-    
+def create_one_page_stl_from_dxf(
+    txt_dxf: Path,
+    braille_dxf: Path,
+    image_dxf: Path,
+    output: Path = None,
+    stroke_width: float = IMAGE_STROKE_WIDTH,
+    stroke_height: float = IMAGE_STROKE_HEIGHT,
+    text_height: float = TEXT_SOLID_HEIGHT,
+    export_step: bool = False,
+):
+    txt_dxf = Path(txt_dxf) if txt_dxf else None
+    braille_dxf = Path(braille_dxf) if braille_dxf else None
+    image_dxf = Path(image_dxf) if image_dxf else None
+
     text_shapes: List[List[Point]] = []
     braille_circles: List[CircleDef] = []
     image_closed: List[List[Point]] = []
     image_open: List[List[Point]] = []
     image_circles: List[CircleDef] = []
 
-    if args.text_dxf:
-        if not args.text_dxf.exists():
-            raise FileNotFoundError(args.text_dxf)
-        print(f"Reading TEXT DXF: {args.text_dxf}")
-        text_shapes = extract_closed_polygons_for_text(args.text_dxf)
+    if txt_dxf:
+        if not txt_dxf.exists():
+            raise FileNotFoundError(txt_dxf)
+        print(f"Reading TEXT DXF: {txt_dxf}")
+        text_shapes = extract_closed_polygons_for_text(txt_dxf)
         print(f"  Text shapes: {len(text_shapes)}")
 
-    if args.braille_dxf:
-        if not args.braille_dxf.exists():
-            raise FileNotFoundError(args.braille_dxf)
-        print(f"Reading BRAILLE DXF: {args.braille_dxf}")
-        braille_circles = extract_braille_circles(args.braille_dxf)
+    if braille_dxf:
+        if not braille_dxf.exists():
+            raise FileNotFoundError(braille_dxf)
+        print(f"Reading BRAILLE DXF: {braille_dxf}")
+        braille_circles = extract_braille_circles(braille_dxf)
         print(f"  Braille circles: {len(braille_circles)}")
 
-    if args.image_dxf:
-        if not args.image_dxf.exists():
-            raise FileNotFoundError(args.image_dxf)
-        print(f"Reading IMAGE DXF: {args.image_dxf}")
-        image_closed, image_open, image_circles = extract_image_centerlines(args.image_dxf)
+    if image_dxf:
+        if not image_dxf.exists():
+            raise FileNotFoundError(image_dxf)
+        print(f"Reading IMAGE DXF: {image_dxf}")
+        image_closed, image_open, image_circles = extract_image_centerlines(image_dxf)
         print(f"  Image paths: closed={len(image_closed)} open={len(image_open)} circles={len(image_circles)}")
 
     # Center all content together on base plate
@@ -547,40 +559,42 @@ def create_one_page_stl_from_dxf(txt_dxf: Path, braille_dxf: Path, image_dxf: Pa
     model = create_base_plate()
 
     if text_shapes:
-        model = extrude_text_solids(model, text_shapes, height=args.text_height)
+        model = extrude_text_solids(model, text_shapes, height=text_height)
 
     if braille_circles:
         model = add_braille_domes(model, braille_circles)
 
-    if args.image_dxf and (image_closed or image_open or image_circles):
+    if image_dxf and (image_closed or image_open or image_circles):
         model = extrude_image_strokes(
             model,
             closed_paths=image_closed,
             open_paths=image_open,
             circles=image_circles,
-            stroke_width=args.stroke_width,
-            stroke_height=args.stroke_height,
+            stroke_width=stroke_width,
+            stroke_height=stroke_height,
         )
 
     model = create_mounting_holes(model)
 
     # Output path
-    out = args.output
+    out = Path(output) if output else None
     if out is None:
-        if args.image_dxf:
-            out = args.image_dxf.with_suffix(".stl")
-        elif args.text_dxf:
-            out = args.text_dxf.with_suffix(".stl")
+        if image_dxf:
+            out = image_dxf.with_suffix(".stl")
+        elif txt_dxf:
+            out = txt_dxf.with_suffix(".stl")
         else:
-            out = args.braille_dxf.with_suffix(".stl")
+            out = braille_dxf.with_suffix(".stl")
 
     cq.exporters.export(model, str(out))
     print(f"\nExported STL: {out}")
 
-    if args.step:
+    if export_step:
         step_out = out.with_suffix(".step")
         cq.exporters.export(model, str(step_out))
         print(f"Exported STEP: {step_out}")
+
+    return str(out)
 
 
 if __name__ == "__main__":
@@ -595,4 +609,13 @@ if __name__ == "__main__":
     ap.add_argument("--text-height", type=float, default=TEXT_SOLID_HEIGHT, help="Text solid extrusion height in mm")
     args = ap.parse_args()
 
-    create_one_page_stl_from_dxf(args.text_dxf, args.braille_dxf, args.image_dxf)
+    create_one_page_stl_from_dxf(
+        txt_dxf=args.text_dxf,
+        braille_dxf=args.braille_dxf,
+        image_dxf=args.image_dxf,
+        output=args.output,
+        stroke_width=args.stroke_width,
+        stroke_height=args.stroke_height,
+        text_height=args.text_height,
+        export_step=args.step,
+    )

@@ -1,0 +1,12 @@
+torch
+diffusers
+opencv-python
+pillow
+ezdxf
+cadquery
+pyclipper
+trimesh
+gradio
+deep-translator
+numpy
+matplotlib

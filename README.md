@@ -33,21 +33,30 @@ The STL has:
 
 ```
 book_generator_tom/
-├── app.py              # Gradio web UI — interactive book creator
-├── app2.py             # Alternate/experimental Gradio app
+├── src/                # Library modules
+│   ├── language_funcs.py
+│   ├── image_funcs.py
+│   ├── image_generator.py
+│   ├── dxf_3d.py
+│   └── flow_manager.py
+├── app/                # UI entry points
+│   ├── app.py          # Gradio web UI — interactive book creator
+│   └── app2.py         # Alternate/experimental Gradio app
+├── notebooks/          # Jupyter exploration notebooks
+│   ├── TOM.ipynb
+│   ├── TOM2.ipynb
+│   └── app_colab.ipynb
+├── outputs/            # Test/dev output files — gitignored
+├── books/              # Production run outputs — gitignored
+├── assets/             # Static assets (fonts, etc.)
 ├── main.py             # Single-page CLI script (early version)
-├── flow_manager.py     # Orchestrates multi-page book generation
-├── image_generator.py  # Stable Diffusion image gen + image/text/braille PNGs
-├── image_funcs.py      # Image processing utilities and PNG → DXF conversion
-├── language_funcs.py   # Hebrew ↔ English translation, nikud, Braille conversion
-├── dxf_3d.py           # Merges 3 DXF files into one STL (the 3D builder)
-├── TOM.ipynb           # Original exploration notebook
-└── app_colab.ipynb     # Google Colab version
+├── requirements.txt
+└── README.md
 ```
 
 ### Key modules at a glance
 
-**`language_funcs.py`** — Hebrew language utilities
+**`src/language_funcs.py`** — Hebrew language utilities
 - Translates Hebrew → English (for the image generation prompt)
 - Interactively adds nikud (vowel marks: dagesh, holam, shuruk, hirik, shin dot)
 - Converts Hebrew text (with nikud) to Braille unicode characters
@@ -58,18 +67,18 @@ book_generator_tom/
 - Edge-detects, centers the object, and saves three PNGs: image / text / braille
 - Calls `images_to_dxf()` to convert all three to DXF
 
-**`image_funcs.py`** — Low-level image/DXF utilities
+**`src/image_funcs.py`** — Low-level image/DXF utilities
 - `image_to_dxf_exact()` — converts a processed edge image to an accurate DXF polyline
 - `png_to_dxf()` — converts any PNG to a DXF using contour extraction
 - `plot_dxf()` — quick matplotlib preview of a DXF file
 
-**`dxf_3d.py`** — 3D model builder (the most complex module)
+**`src/dxf_3d.py`** — 3D model builder (the most complex module)
 - Reads three separate DXFs: text shapes, braille circles, image centerlines
 - Centers all content on a 150×150mm base plate
 - Extrudes text as solid shapes, braille as spherical domes, image as stroked ridges
 - Exports to STL (and optionally STEP) using CadQuery
 
-**`flow_manager.py`** — Multi-page orchestrator
+**`src/flow_manager.py`** — Multi-page orchestrator
 - Takes a list of page specs (description, classification, generate flag)
 - Creates a timestamped output folder per book
 - Processes each page atomically: if a step fails, that page is skipped cleanly
@@ -90,8 +99,8 @@ book_generator_tom/
 ### Option 1 — Gradio Web UI (recommended)
 
 ```bash
-pip install gradio trimesh
-python app.py
+pip install -r requirements.txt
+python app/app.py
 ```
 
 Open the local URL shown in the terminal. Build your book page by page.
@@ -127,7 +136,7 @@ result = fm.run()
 ### Option 4 — Convert DXFs to STL directly
 
 ```bash
-python dxf_3d.py --text text.dxf --braille braille.dxf --image image.dxf -o page1.stl
+python src/dxf_3d.py --text text.dxf --braille braille.dxf --image image.dxf -o page1.stl
 ```
 
 ---
@@ -149,16 +158,15 @@ python dxf_3d.py --text text.dxf --braille braille.dxf --image image.dxf -o page
 
 For Colab, see `app_colab.ipynb` which includes install commands at the top.
 
-The `NotoSansSymbols2-Regular.ttf` font is required for rendering Braille characters:
-```bash
-wget -O NotoSansSymbols2-Regular.ttf \
-  https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansSymbols2/NotoSansSymbols2-Regular.ttf
-```
+The `NotoSansSymbols2-Regular.ttf` font is required for rendering Braille characters. Place it in `assets/` (see the Notes section for the download command). The `assets/` directory is not gitignored, but `.ttf` files are — so you need to download it after cloning.
 
 ---
 
-## Known issues / work in progress
+## Notes
 
-- `flow_manager.py` has a bug: `os.path.exist()` should be `os.path.exists(path)` — pages with images will silently store `None` locations
-- `dxf_3d.py`'s `create_one_page_stl_from_dxf()` still references `args` (CLI args) instead of the function parameters — it needs refactoring to work as an importable function
-- `language_funcs.py`'s `add_nikud()` uses interactive `input()` calls, which doesn't work in the Gradio UI — `app.py` handles disambiguation separately via its own UI widgets
+- `src/language_funcs.py`'s `add_nikud()` uses interactive `input()` calls, which doesn't work in the Gradio UI — `app/app.py` handles disambiguation separately via its own UI widgets
+- The font file `NotoSansSymbols2-Regular.ttf` is not tracked in git (see `.gitignore`). Download it once:
+  ```bash
+  wget -O assets/NotoSansSymbols2-Regular.ttf \
+    https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSansSymbols2/NotoSansSymbols2-Regular.ttf
+  ```

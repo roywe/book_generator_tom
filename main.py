@@ -10,8 +10,8 @@ import cv2
 import numpy as np
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
-import language_funcs as lf
-import image_funcs as imf
+from src import language_funcs as lf
+from src import image_funcs as imf
 
 # font_path = "/content/NotoSansSymbols2-Regular.ttf"
 font_path = "NotoSansSymbols2-Regular.ttf"

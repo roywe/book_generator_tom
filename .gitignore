@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Test/dev outputs
+
+# Fonts (download separately)
+*.ttf
+
+# Model cache
+.cache/
+models/
+
+# Gradio temp files
+braille_output_*/
+*.zip
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
